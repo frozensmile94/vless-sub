@@ -3,8 +3,8 @@ import sys
 
 # Твои ссылки. Проверь их внимательно!
 sources = [
-    "https://home.frozensmile.online/NP5pxlh3O7/",
-    "https://eternal.frozensmile.online//v6k9-Zp2m-Rx8t-qW5y-L7n1/"
+    "https://home.frozensmile.online/NP5pxlh3O7/mwypm5y31myyn5en",
+    "https://eternal.frozensmile.online/v6k9-Zp2m-Rx8t-qW5y-L7n1/14dozevwyiheyw5f"
 ]
 
 def get_configs():
