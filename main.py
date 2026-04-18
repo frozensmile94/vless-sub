@@ -1,4 +1,5 @@
 import requests
+import base64
 
 sources = [
     "https://home.frozensmile.online/NP5pxlh3O7/mwypm5y31myyn5en",
@@ -7,34 +8,27 @@ sources = [
 
 def get_configs():
     all_configs = []
-    # Максимально подробные заголовки браузера
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*)',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1'
-    }
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/123.0.0.0 Safari/537.36'}
     
     for url in sources:
         try:
-            print(f"Попытка подключения к: {url}")
-            # Увеличиваем таймаут и отключаем проверку SSL
-            resp = requests.get(url, timeout=45, verify=False, headers=headers) 
-            
-            if resp.status_code == 200:
-                content = resp.text.strip()
-                if content:
-                    all_configs.append(content)
-                    print(f"Успех! Получено данных.")
-            else:
-                print(f"Сервер ответил кодом: {resp.status_code}")
-        except Exception as e:
-            print(f"Ошибка: {str(e)}")
+            resp = requests.get(url, timeout=30, verify=False, headers=headers) 
+            if resp.status_code == 200 and resp.text.strip():
+                all_configs.append(resp.text.strip())
+        except:
+            pass
 
-    output = "\n".join(all_configs) if all_configs else "No configs found"
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(output)
+    if all_configs:
+        # Склеиваем все конфиги через перенос строки
+        combined_text = "\n".join(all_configs)
+        # Кодируем в Base64 (стандарт для v2box/Shadowrocket)
+        encoded_configs = base64.b64encode(combined_text.encode('utf-8')).decode('utf-8')
+        
+        with open("index.html", "w", encoding="utf-8") as f:
+            f.write(encoded_configs)
+    else:
+        with open("index.html", "w", encoding="utf-8") as f:
+            f.write("No configs")
 
 if __name__ == "__main__":
     get_configs()
