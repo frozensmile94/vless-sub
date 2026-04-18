@@ -1,0 +1,41 @@
+name: Server Backup
+on:
+  schedule:
+    - cron: '0 0 * * *' # Запуск каждую ночь в 00:00
+  workflow_dispatch: # Кнопка для ручного запуска
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: 'just-ignore'
+          if_key_exists: replace
+
+      - name: Fetch Database from RU
+        run: |
+          scp -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@${{ secrets.RU_SERVER_IP }}:/etc/x-ui/x-ui.db ./ru_backup.db || echo "RU backup failed"
+          
+      - name: Fetch Database from FI
+        run: |
+          scp -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@${{ secrets.FI_SERVER_IP }}:/etc/x-ui/x-ui.db ./fi_backup.db || echo "FI backup failed"
+
+      - name: Commit and Push Backups
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p backups
+          
+          # Проверяем наличие файлов перед перемещением, чтобы не было ошибок
+          [ -f ru_backup.db ] && mv ru_backup.db backups/ru_x-ui.db
+          [ -f fi_backup.db ] && mv fi_backup.db backups/fi_x-ui.db
+          
+          git add backups/
+          git commit -m "Auto-backup: $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git push
