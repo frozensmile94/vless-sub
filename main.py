@@ -1,48 +1,38 @@
 import requests
-import sys
+import os
 
-# Твои ссылки. Проверь их внимательно!
+# Твои ссылки
 sources = [
     "https://home.frozensmile.online/NP5pxlh3O7/mwypm5y31myyn5en",
-    "https://eternal.frozensmile.online/v6k9-Zp2m-Rx8t-qW5y-L7n1/14dozevwyiheyw5f"
+    "https://eternal.frozensmile.online/v6k9-Zp2m-Rx8t-qW5y-L7n1/14dozevwyiheyw5f" # ЗАМЕНИ ЭТО, ЕСЛИ ЕСТЬ
 ]
 
-def get_configs():
-    all_configs = []
-    print(f"Python version: {sys.version}")
+def run():
+    results = []
+    print("--- Начало сбора конфигов ---")
     
     for url in sources:
         if "ВАШ_ПУТЬ" in url:
-            print(f"Пропустил ссылку: {url} (нужно заменить на реальную)")
+            print(f"Propustil shablonnuyu ssilku: {url}")
             continue
             
         try:
-            print(f"Запрашиваю: {url}")
-            # Добавили verify=False на случай проблем с SSL сертификатами
-            resp = requests.get(url, timeout=15, verify=False) 
-            
-            if resp.status_code == 200:
-                content = resp.text.strip()
-                if content:
-                    all_configs.append(content)
-                    print(f"Успех! Получено символов: {len(content)}")
-                else:
-                    print(f"Ошибка: Сервер {url} вернул пустой ответ")
+            print(f"Proveryayu: {url}")
+            # Отключаем проверку SSL и ставим долгий таймаут
+            r = requests.get(url, timeout=20, verify=False)
+            if r.status_code == 200 and r.text.strip():
+                results.append(r.text.strip())
+                print(f"Uspeh! Polucheno: {len(r.text)} simvolov")
             else:
-                print(f"Ошибка: Сервер {url} вернул статус {resp.status_code}")
-                
+                print(f"Oshibka: Status {r.status_code} dlya {url}")
         except Exception as e:
-            print(f"Критическая ошибка при запросе {url}: {str(e)}")
+            print(f"Ne udalos' podkluchit'sa k {url}: {e}")
 
-    # Сохраняем результат в любом случае, чтобы скрипт не падал с ошибкой
-    output_content = "\n".join(all_configs) if all_configs else "No configs found"
-    
-    try:
-        with open("index.html", "w", encoding="utf-8") as f:
-            f.write(output_content)
-        print("Файл index.html успешно обновлен.")
-    except Exception as e:
-        print(f"Ошибка при записи файла: {e}")
+    # Сохраняем результат
+    content = "\n".join(results) if results else "No configs collected yet"
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(content)
+    print("--- Gotovo! Fail index.html sozdan ---")
 
 if __name__ == "__main__":
-    get_configs()
+    run()
